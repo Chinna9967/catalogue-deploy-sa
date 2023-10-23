@@ -53,6 +53,7 @@ resource "aws_ec2_instance_state" "catalogue_instance" {
 resource "aws_ami_from_instance" "catalogue_ami" {
   name               = "${var.common_tags.Component}-${local.current_time}"
   source_instance_id = module.catalogue_instance.id
+  depends_on = [ aws_ec2_instance_state.catalogue_instance ]
 }
 
 resource "null_resource" "delete_instance" {
@@ -65,6 +66,7 @@ resource "null_resource" "delete_instance" {
     # Bootstrap script called with private_ip of each node in the cluster
     command = "aws ec2 terminate-instances --instance-ids ${module.catalogue_instance.id}"
   }
+  depends_on = [ aws_ami_from_instance.catalogue_ami ]
 }
 
 output "app_version" {
